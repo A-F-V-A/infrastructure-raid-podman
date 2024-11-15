@@ -364,9 +364,56 @@ El siguiente paso consiste en ejecutar los contenedores y montarlos sobre los **
       <img src="./assets/Screenshot from 2024-11-13 23-25-53.png" alt="logico">
    </p>
 
- Este comando podemos ejecutarlo para iniciar un contenedor en segundo plano con la imagen **my-mysql**. Le asignamos el nombre **my-mysql**, mapeamos el puerto **3306** del host al puerto **3306** del contenedor **(-p 3306:3306)**, y montamos el directorio **/mnt/mysql** del host en **/var/lib/mysql** del contenedor, lo que nos permite 
+Este comando podemos ejecutarlo para iniciar un contenedor en segundo plano con la imagen my-**mysql**. Le asignamos el nombre **my-mysql**, mapeamos el puerto **3306** del host al puerto **3306** del contenedor **(-p 3306:3306)**, y montamos el directorio **/mnt/mysql** del host en **/var/lib/mysql** del contenedor, lo que nos permite persistir los datos de la base de datos en nuestro sistema local para que no se pierdan al reiniciar el contenedor.
 
+Ahora vamos a ejecurar MySQL, para poder hacerlo tenemos que realizar el siguiente comando.
 
+- Comando para Ejecutar MySQL:
+   ```bash
+   docker run exec -it my-mysql -u myuserafvajdlm -p my-mysql
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-27-19.png" alt="logico">
+   </p>
+
+Después de ejecutar este comando, podemos evidenciar que **MySQL** nos pedirá la contraseña de inmediato. Esta contraseña es la misma que asignamos previamente en nuestro archivo **Dockerfile** durante la configuración de la imagen. Una vez ingresada correctamente, tendremos acceso a la consola de MySQL para interactuar con la base de datos.
+
+Ahora podemos interactuar con la consola de MySQL, para poder verificarlo podemos hacer el siguiente comando
+
+- Comando para 
+   ```bash
+   SHOW DATABASES
+   ```
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-29-29.png" alt="logico">
+   </p>
+
+Podemos evidenciar que el usuario que configuramos en el archivo **Dockerfile** está disponible. Ahora, solo sería cuestión de acceder a este usuario y comenzar a realizar pruebas. En este caso, accedimos al usuario y creamos una tabla llamada test_table con dos columnas: id, de tipo **INT** como clave primaria, y name, de tipo **VARCHAR(50)**. Esto confirma que el contenedor y la base de datos están funcionando correctamente.
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-31-33.png" alt="logico">
+   </p>
+
+Insertamos un dato en nuestra tabla test_table y luego realizamos una consulta sencilla para obtener y verificar los datos almacenados. Esto nos permitió confirmar que la base de datos está operativa y que la tabla funciona correctamente para almacenar y recuperar información.
+
+Ahora solo para salir podemos poner **exit** para salir de la consola de MySQL
+
+- Comando para ver los contenedores activos
+   ```bash
+   docker ps
+   ```
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-32-37.png" alt="logico">
+   </p>
+
+Con este comando podemos verificar que actualmente tenemos dos contenedores activos: **my-apache y my-mysql**. Esto demuestra que ambos servicios están en ejecución y listos para ser utilizados.
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-35-42.png" alt="logico">
+</p>
+
+Eliminamos por completo el contenedor y revisamos la carpeta **/mnt/mysql**, donde pudimos comprobar que la información de las acciones realizadas anteriormente se mantiene intacta. Esto es posible gracias al montaje de volúmenes, que asegura que los datos se guarden de manera persistente en el sistema local, incluso después de eliminar el contenedor.
 
 
 
