@@ -14,7 +14,8 @@ Este documento guía la configuración de un servidor en una máquina virtual co
 9. [Montaje de Volúmenes](#montaje-de-volumenes)
 10. [Instalación de Docker](#instalación-de-docker)
 11. [Instalación de Podman](#instalación-de-podman)
-
+12. [Creación de Dockerfile](#creación-de-dockerfile-para-cada-contenedor)
+13. [Dockerfile apache](#creación-de-dockerfile-apache)
 ---
 
 ## Requisitos Previos
@@ -222,7 +223,7 @@ Para comenzar con la creación del Dockerfile de cada servicio, primero es neces
    ```
 
 
-## Creación de Dockerfile Apache
+## Creación de Dockerfile Apache (Docker)
 
 Comenzamos creando la carpeta correspondiente para el servicio de Apache, junto con su archivo **Dockerfile**.
 
@@ -275,3 +276,100 @@ Lo siguiente que vamos a hacer es construir la imagen a partir del Dockerfile qu
    <p aligin = 'center'>
       <img src="./assets/Screenshot from 2024-11-13 23-10-03.png" alt="logico" width="500">
 </p>
+
+El siguiente paso consiste en ejecutar los contenedores y montarlos sobre los **volúmenes lógicos (LVM)**, asegurándonos de que estén correctamente configurados para utilizar el almacenamiento gestionado de manera eficiente. Para eso realizaremos lo siguiente:
+
+- Comando para Ejecutar el Contenedor
+
+   ```bash
+   docker run -d --name my-apache -p 5051:80 -v /mnt/apache:/var/www/html my-apache
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-13-22.png" alt="logico">
+   </p>
+
+   Este comando podemos ejecutarlo para iniciar un contenedor en segundo plano con la imagen **my-apache**. Le asignamos el nombre **my-apache**, mapeamos el puerto **5051** del host al puerto **80** del contenedor **(-p 5051:80)**, y montamos el directorio **/mnt/apache** del host en **/var/www/html** del contenedor, lo que nos permite compartir archivos entre ambos. De esta manera, Apache se ejecutará en el contenedor y servirá el contenido desde el directorio especificado en el host.
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-14-13.png" alt="logico" width="500">
+</p>
+
+Como podemos ver, si accedemos a nuestra IP local a través del puerto **5051**, podremos ver el índice predeterminado de Apache que se está sirviendo desde el contenedor. Esto confirma que el contenedor está funcionando correctamente y que la configuración del mapeo de puertos y el montaje del volumen se ha realizado con éxito.
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-15-18.png" alt="logico" width="500">
+</p>
+
+Ahora, vamos a crear nuestro propio archivo index.html para mostrar un mensaje personalizado de "Hola" desde Apache. Para hacerlo, simplemente debemos crear un archivo HTML con el contenido deseado y colocarlo en el directorio que hemos montado previamente en el contenedor **/mnt/apache**
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-15-49.png" alt="logico" width="500">
+</p>
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-16-37.png" alt="logico" width="500">
+</p>
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-16-58.png" alt="logico" width="500">
+</p>
+
+Al modificar el archivo **/mnt/apache/index.html** en mi máquina local, los cambios se reflejan automáticamente en el navegador. Esto sucede porque monté el directorio local en el contenedor, por lo que cualquier ajuste en el archivo se muestra de inmediato al acceder a mi ip local con su pueto **5051**
+
+## Creación Dockerfile MySQL (Docker)
+
+Para la creación del **Dockerfile** de MySQL, el proceso es muy similar al que hicimos con Apache. Primero, debemos crear una carpeta donde alojaremos nuestro **Dockerfile**. Luego, dentro de esa carpeta, crearemos el archivo **Dockerfile** con las instrucciones ne
+cesarias para configurar MySQL. 
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-19-29.png" alt="logico" width="500">
+</p>
+
+Con el siguiente comando podemos construir la imagen de MySQL:
+
+   ```bash
+   FROM mysql:latest
+
+   ENV MYSQL_ROOT_PASSWORD=afvajdlm
+   ENV MYSQL_DATABASE=myafvajdlm
+   ENV MYSQL_USER=myuserafvajdml
+   ENV MYSQL_PASSWORD=afvajdlm
+
+   EXPOSE 3306
+   ```
+   Este **Dockerfile** lo creeamos utilizando la imagen oficial de **MySQL** más reciente como base. Establecimos la contraseña para el usuario root, creamos una base de datos llamada myafvajdlm y también un usuario adicional llamado myuserafvajdml con su respectiva contraseña. Además,se expuso el puerto **3306**, que es el predeterminado de **MySQL**, para permitir el acceso a la base de datos desde fuera del contenedor. Así, tengo una instancia de **MySQL** lista para usar con configuraciones personalizadas.
+
+   Realizamos la construcción de la imagen a partir del Dockerfile que acabamos de crear.
+
+- Comando para Construir la Imagen
+
+   ```bash
+  docker build -t my-mysql mysql/
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-22-21.png" alt="logico" width="500">
+</p>
+
+El siguiente paso consiste en ejecutar los contenedores y montarlos sobre los **volúmenes lógicos (LVM)**, asegurándonos de que estén correctamente configurados para utilizar el almacenamiento gestionado de manera eficiente. Para eso realizaremos lo siguiente:
+
+- Comando para Ejecutar el Contenedor
+
+   ```bash
+   docker run -d --name my-mysql -p 3306:3306 -v /mnt/mysql:/var/lib/mysql my-mysql
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-25-53.png" alt="logico">
+   </p>
+
+ Este comando podemos ejecutarlo para iniciar un contenedor en segundo plano con la imagen **my-mysql**. Le asignamos el nombre **my-mysql**, mapeamos el puerto **3306** del host al puerto **3306** del contenedor **(-p 3306:3306)**, y montamos el directorio **/mnt/mysql** del host en **/var/lib/mysql** del contenedor, lo que nos permite 
+
+
+
+
+
+
+
+
