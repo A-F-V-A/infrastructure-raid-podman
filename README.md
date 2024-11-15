@@ -15,7 +15,19 @@ Este documento guía la configuración de un servidor en una máquina virtual co
 10. [Instalación de Docker](#instalación-de-docker)
 11. [Instalación de Podman](#instalación-de-podman)
 12. [Creación de Dockerfile](#creación-de-dockerfile-para-cada-contenedor)
-13. [Dockerfile apache](#creación-de-dockerfile-apache)
+13. [Dockerfile Apache](#creación-de-dockerfile-apache-docker)
+14. [Dockerfile MySQL](#creación-dockerfile-mysql-docker)
+15. [Dockerfile Nginx](#creación-dockerfile-nginx-podman)
+16. [Conclusión](#conclusión)
+
+## Archivos Dockerfile
+1. [Archivo Dockerfile Apache](./apache/Dockerfile)
+2. [Archivo Dockerfile MySQL](./mysql/Dockerfile)
+3. [Archivo Dockerfile Nginx](./nginx/Dockerfile)
+
+## Archivos index.html
+1. [index.html Apache](./apache/index.html)
+2. [index.html Nginx](./nginx/index.html)
 ---
 
 ## Requisitos Previos
@@ -259,7 +271,7 @@ el siguiente paso es modificar el **Dockerfile**, para esto agregaremos lo sigui
       <img src="./assets/Screenshot from 2024-11-13 23-03-00.png" alt="logico" width="500">
 </p>
 
-   Este **Dockerfile** usa una imagen de Ubuntu y luego instala Apache, el servidor web. Después, limpia archivos innecesarios para reducir el tamaño de la imagen. Expone el puerto 80, que es el usado por los sitios web, y finalmente, al iniciar el contenedor, arranca Apache para que el servidor web esté funcionando y listo para recibir solicitudes.
+   Este **Dockerfile** usa una imagen de Ubuntu y luego instala Apache, el servidor web. Después, limpia archivos innecesarios para reducir el tamaño de la imagen. Expone el puerto 80, que es el usado por los sitios web, y finalmente, al iniciar el contenedor, arranca Apache para que el servidor web esté funcionando y listo para recibir solicitudes. [Revisar Dockerfile](./apache/Dockerfile)
 
    <p aligin = 'center'>
       <img src="./assets/Screenshot from 2024-11-13 23-03-19.png" alt="logico" width="500">
@@ -315,7 +327,7 @@ Ahora, vamos a crear nuestro propio archivo index.html para mostrar un mensaje p
       <img src="./assets/Screenshot from 2024-11-13 23-16-58.png" alt="logico" width="500">
 </p>
 
-Al modificar el archivo **/mnt/apache/index.html** en mi máquina local, los cambios se reflejan automáticamente en el navegador. Esto sucede porque monté el directorio local en el contenedor, por lo que cualquier ajuste en el archivo se muestra de inmediato al acceder a mi ip local con su pueto **5051**
+Al modificar el archivo **/mnt/apache/index.html** en mi máquina local, los cambios se reflejan automáticamente en el navegador. Esto sucede porque monté el directorio local en el contenedor, por lo que cualquier ajuste en el archivo se muestra de inmediato al acceder a mi ip local con su pueto **5051**. [Revisar index.html](./apache/index.html)
 
 ## Creación Dockerfile MySQL (Docker)
 
@@ -338,7 +350,7 @@ Con el siguiente comando podemos construir la imagen de MySQL:
 
    EXPOSE 3306
    ```
-   Este **Dockerfile** lo creeamos utilizando la imagen oficial de **MySQL** más reciente como base. Establecimos la contraseña para el usuario root, creamos una base de datos llamada myafvajdlm y también un usuario adicional llamado myuserafvajdml con su respectiva contraseña. Además,se expuso el puerto **3306**, que es el predeterminado de **MySQL**, para permitir el acceso a la base de datos desde fuera del contenedor. Así, tengo una instancia de **MySQL** lista para usar con configuraciones personalizadas.
+   Este **Dockerfile** lo creeamos utilizando la imagen oficial de **MySQL** más reciente como base. Establecimos la contraseña para el usuario root, creamos una base de datos llamada myafvajdlm y también un usuario adicional llamado myuserafvajdml con su respectiva contraseña. Además,se expuso el puerto **3306**, que es el predeterminado de **MySQL**, para permitir el acceso a la base de datos desde fuera del contenedor. Así, tengo una instancia de **MySQL** lista para usar con configuraciones personalizadas. [Revisar Dockerfile](./mysql/Dockerfile)
 
    Realizamos la construcción de la imagen a partir del Dockerfile que acabamos de crear.
 
@@ -414,6 +426,136 @@ Con este comando podemos verificar que actualmente tenemos dos contenedores acti
 </p>
 
 Eliminamos por completo el contenedor y revisamos la carpeta **/mnt/mysql**, donde pudimos comprobar que la información de las acciones realizadas anteriormente se mantiene intacta. Esto es posible gracias al montaje de volúmenes, que asegura que los datos se guarden de manera persistente en el sistema local, incluso después de eliminar el contenedor.
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-37-05.png" alt="logico">
+</p>
+
+Para verificar que las acciones realizadas anteriormente siguen intactas, simplemente volvemos a ejecutar el contenedor, accedemos a la consola de **MySQL** y realizamos las mismas consultas que hicimos al inicio. Esto nos permite confirmar que los datos se han mantenido gracias al uso del volumen persistente.
+
+## Creación Dockerfile Nginx (Podman)
+
+Para la correcta implementación de **Nginx**, creamos una carpeta dedicada y dentro de ella un archivo **Dockerfile**. En este archivo definiremos las instrucciones necesarias para configurar nuestro servidor **Nginx** personalizado. Esto nos permitirá gestionar de manera eficiente las solicitudes HTTP y servir contenido estático o dinámico según nuestras necesidades.
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-45-33.png" alt="logico">
+</p>
+
+Al inicio, presentamos un problema al declarar el **Dockerfile** con ***FROM nginx:latest***. Esto se debe a que, al trabajar con Podman, no se puede acceder directamente al **Docker Hub**. Para solucionar este inconveniente, modificamos la declaración para que utilice un registro accesible por Podman, como un registro local o uno configurado específicamente para nuestra red. En este caso se declaro de la siguiente manera:
+
+- Dockerfile Nginx
+
+   ```bash
+   FROM docker.io/library/nginx:latest
+
+   EXPOSE 80
+
+   CMD ["nginx", "-g", "daemon off;"]
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-45-33.png" alt="logico">
+</p>
+
+Aquí usamos directamente el enlace para que, mediante Podman, podamos acceder a la última versión de **Nginx** disponible en **Docker Hub**, evitando el problema de acceso directo. De esta forma, Podman puede obtener la imagen correctamente. En la imagen adjunta podemos evidenciar el error que se generó al intentar acceder sin especificar el enlace completo, lo que nos impidió descargar la imagen de forma correcta inicialmente. [Revisar Dockerfile](./nginx/Dockerfile)
+
+Realizamos la contstrucción del dockerfile mediante podman, para esto usamos el siguiente comando:
+
+   ```bash
+   podman build -t my-nginx nginix/
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-46-13.png" alt="logico">
+   </p>
+
+   Este comando construye la imagen de **Nginx** utilizando el **Dockerfile** que hemos creado en el directorio actual. Al usar Podman, se generará una imagen etiquetada como **my-nginx** que podrá ser utilizada para crear contenedores.
+
+Ahora ya construida la imagen podremos iniciar nuestro contenedor, para ello vamos a ejecutar los siguientes comandos
+
+- Comando para la creación del contenedor
+   ```bash
+   podman run -d --name my-nginx -p 0.0.0.:5052:80 nginx
+   ```
+   Este comando ejecuta el contenedor en segundo plano **(-d)** usando la imagen **my-nginx** que acabamos de construir. Le asignamos el nombre **my-nginx**, y mapeamos el puerto **8080** del host al puerto **80** del contenedor, lo que nos permite acceder a Nginx a través de la dirección localhost:8080.
+
+- Comando para el tráfico de puertos
+   ```bash
+   sudo ufw allow 8080/tcp && sudo ufw allow 80/tcp
+   ```
+
+- Comando para la configuración del firewall
+   ```bash
+   sudo ufw reload
+   ```
+   
+   Con estos comandos, configuramos el tráfico de puertos en nuestro sistema, permitiendo que las conexiones entrantes a los puertos 8080 (para Nginx) y 80 (puerto HTTP estándar) sean aceptadas. Esto asegura que podamos acceder a los servicios en esos puertos desde otras máquinas en la red, mientras mantenemos el control sobre el tráfico de otros puertos a través del firewall UFW.
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-14 00-03-53.png" alt="logico">
+   </p>
+
+- Comando para iniciar el contenedor
+
+   ```bash
+   podman run -d --name my-nginx -p 8080:80 -v /mnt/nginx:/usr/share/nginx/html my-nginx
+   ```
+   Este comando inicia el contenedor my-nginx utilizando Podman, asignando el puerto 8080 del host al puerto 80 del contenedor, lo que nos permite acceder a Nginx a través de localhost:8080. Además, mapeamos el directorio /mnt/nginx del host al directorio /usr/share/nginx/html del contenedor, donde Nginx busca los archivos HTML para servir. Esto nos permite tener un index.html personalizado y hacer cambios en el contenido directamente desde el host.
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-14 00-06-54.png" alt="logico">
+   </p>
+
+
+Después de tener todo configurado, podemos acceder desde nuestro navegador a **localhost:8080** (o la IP de tu máquina si estás en otra red). Al hacerlo, veremos el saludo inicial de Nginx, que es la página predeterminada que aparece cuando se instala y ejecuta Nginx por primera vez. Esto indica que el contenedor está funcionando correctamente y que el servidor web está activo y respondiendo en el puerto configurado.
+
+ <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-14 00-05-52.png" alt="logico">
+   </p>
+
+Ya finalmente hacemos la creación de nuestro index.html para que tengamos un saludo personalizado, para eso lo creamos en la siguiente ruta
+
+- Creación de nuestro index.html
+   ```bash
+   sudo touch /mnt/nginx/index.html
+   ```
+
+   <p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-13 23-50-28.png" alt="logico">
+   </p>
+
+   Con este comando hacemos la creación de nuestro **index.html**, el cual nos va a permitir personalizar la página de inicio de nuestro servidor Nginx. Este archivo contendrá el contenido que deseamos mostrar cuando accedemos al servidor desde el navegador, reemplazando el saludo predeterminado de Nginx con nuestro propio mensaje o diseño. [Ver index.html](./nginx/index.html)
+
+<p aligin = 'center'>
+      <img src="./assets/Screenshot from 2024-11-14 00-07-18.png" alt="logico">
+</p>
+
+Finalmente, podemos ver que se cargó satisfactoriamente nuestro index.html en el servidor Nginx y cualquier cambio realizado en el archivo se reflejará de inmediato en la página al hacer las solicitudes al servidor. Esto se debe a que estamos mapeando el directorio /mnt/nginx del host al contenedor, lo que facilita la modificación del contenido sin necesidad de reconstruir el contenedor cada vez que realizamos un cambio.
+
+---
+
+## Conclusión 
+
+podemos concluir que hemos logrado configurar correctamente nuestros contenedores utilizando **Podman** y **Docker**, implementando los servicios de **Apache**, **MySQL** y **Nginx** con éxito. A través de la creación y personalización de los respectivos Dockerfiles, pudimos construir las imágenes necesarias, iniciar los contenedores, y realizar pruebas funcionales, como la carga de archivos personalizados en Nginx y la gestión de bases de datos en MySQL.
+Además, configuramos adecuadamente las reglas del firewall para permitir el tráfico en los puertos necesarios, lo que nos permitió acceder a nuestros servicios desde el navegador sin inconvenientes.
+
+Una parte fundamental de esta implementación fue el uso de **LVM**, que nos permitió gestionar de manera eficiente y flexible el almacenamiento de los contenedores y servicios. Con **LVM**, pudimos organizar y redimensionar los volúmenes lógicos de manera dinámica, lo que proporciona una mayor escalabilidad y control sobre los recursos de almacenamiento en el sistema. Esta práctica mejora la resiliencia y el manejo del almacenamiento en entornos de contenedores, permitiendo adaptarnos fácilmente a futuros requerimientos y optimizando el rendimiento de los servicios.
+
+En conclusión, hemos logrado implementar con éxito un entorno de contenedores utilizando Podman y Docker, configurando y ejecutando los servicios de Apache, MySQL y Nginx. A lo largo del proceso, aprendimos a crear y personalizar Dockerfiles, gestionar contenedores y realizar pruebas funcionales. También configuramos el acceso remoto y optimizamos el tráfico de puertos mediante reglas de firewall.
+
+El uso de LVM (Logical Volume Management) fue clave para gestionar el almacenamiento de manera eficiente, proporcionando flexibilidad y escalabilidad, lo cual es crucial en entornos de contenedores. Esta implementación no solo mejora el manejo del almacenamiento, sino que también facilita la administración dinámica de volúmenes y recursos en el sistema.
+
+Con todo esto, hemos establecido una infraestructura flexible, escalable y fácil de mantener, con la capacidad de adaptarnos a cambios y nuevas demandas de manera eficiente.
+
+
+
+
+
+
+
+
+
+
 
 
 
