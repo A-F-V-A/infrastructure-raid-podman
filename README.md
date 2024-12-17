@@ -2,6 +2,7 @@
 
 Este documento guía la configuración de un servidor en una máquina virtual con tres arreglos RAID 1, donde cada RAID estará compuesto por discos de 2GB, y se crearán volúmenes lógicos de 1GB a partir de estos.
 
+
 ## Índice
 1. [Requisitos Previos](#requisitos-previos)
 2. [Creación de la Máquina Virtual](#creación-de-la-máquina-virtual)
